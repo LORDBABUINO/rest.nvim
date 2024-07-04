@@ -1,8 +1,8 @@
 local rest = require("rest-nvim")
 
 describe("rest testing framework", function()
+  local opts = { keep_going = true, verbose = true }
   it("test create users", function()
-    local opts = { keep_going = true, verbose = true }
     assert(rest.run_file("tests/basic_get.http", opts) == true)
     assert(rest.run_file("tests/post_json_form.http", opts) == true)
     assert(rest.run_file("tests/post_create_user.http", opts) == true)
@@ -10,5 +10,8 @@ describe("rest testing framework", function()
     assert(rest.run_file("tests/put_update_user.http", opts) == true)
     assert(rest.run_file("tests/patch_update_user.http", opts) == true)
     assert(rest.run_file("tests/delete.http", opts) == true)
+  end)
+  it("should send files through multipart/form-data", function()
+    assert(rest.run_file("tests/multipart_form/post_file.http", opts) == true)
   end)
 end)
