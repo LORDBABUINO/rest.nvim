@@ -1,0 +1,5 @@
+POST https://postman-echo.com/post
+
+name="toto"&
+job="leader"&
+-test="./test.txt" # The file field must start with '-'

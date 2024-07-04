@@ -158,6 +158,20 @@ local function get_stats(req, statistics_tbl)
   return stats
 end
 
+local function get_mime_type(filename)
+  local mime_types = {
+    txt = "text/plain",
+    html = "text/html",
+    jpg = "image/jpeg",
+    jpeg = "image/jpeg",
+    png = "image/png",
+    gif = "image/gif",
+    pdf = "application/pdf",
+  }
+  local ext = filename:match("^.+%.([^%.]+)$")
+  return mime_types[ext] or "application/octet-stream"
+end
+
 ---Execute an HTTP request using cURL
 ---@param request Request Request data to be passed to cURL
 ---@return table The request information (url, method, headers, body, etc)
@@ -263,14 +277,20 @@ function client.request(request)
         }
         req:post(post_data)
       end
-    elseif request.body.__TYPE == "form_data" then
+    elseif request.body.__TYPE == "form" then
       body.__TYPE = nil
 
       local form = curl.form()
       for k, v in pairs(body) do
-        form:add_content(k, v)
+        if k:sub(1, 1) == "-" then
+          local key = k:sub(2)
+          local mime_type = get_mime_type(v)
+          form:add_file(key, v, mime_type)
+        else
+          form:add_content(k, v)
+        end
       end
-      req:setopt_httppost(form)
+      req:setopt_httppost(form._handle)
     end
 
     -- Request execution
